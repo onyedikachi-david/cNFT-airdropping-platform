@@ -12,16 +12,16 @@ type Responses = {
     message: string;
     result: {};
 };
-// type DbData = {
-//     id?: number,
-//     created_at?: any,
-//     reference_address?: string,
-//     monitor_addresses?: {
-//         addresses: []
-//     },
-//     callback_id?:string,
-//     network?:string
-// };
+type DbData = {
+    id?: number;
+    created_at?: any;
+    reference_address?: string;
+    monitor_addresses?: {
+        addresses: [];
+    };
+    callback_id?: string;
+    network?: string;
+};
 
 const shyftClient = new ShyftSdk({ apiKey: process.env.NEXT_SHYFT_API_KEY ?? '', network: Network.Mainnet });
 
@@ -154,34 +154,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     }
 }
 
-// async function pushMintsToDatabase(reference_address: string, addresses_to_monitor: [], network: string) {
-//     try {
-//         if (reference_address && addresses_to_monitor.length && network) {
-//             const nftOwners = await shyftClient.nft.getOwners({ network: Network.Devnet, mints: addresses_to_monitor });
-//             console.log(nftOwners);
-//             if (nftOwners.length === 0)
-//                 throw new Error('NO_NFT_DATA');
+async function pushMintsToDatabase(reference_address: string, addresses_to_monitor: [], network: string) {
+    try {
+        if (reference_address && addresses_to_monitor.length && network) {
+            const nftOwners = await shyftClient.nft.getOwners({ network: Network.Devnet, mints: addresses_to_monitor });
+            console.log(nftOwners);
+            if (nftOwners.length === 0) throw new Error('NO_NFT_DATA');
 
-//             const allOwners: object[] = nftOwners;
-//             // const allOwners:object[] = [];
-//             for (var i = 0; i < allOwners.length; i++) {
-//                 const eachOwner: any = allOwners[i];
-//                 //fetch NFT metadata here
-//                 const insertToDb = await supabase.from('monitor_mints').upsert({
-//                     mint_address: eachOwner.nft_address,
-//                     current_holder: eachOwner.owner
-//                 });
-//                 if (insertToDb.error !== null)
-//                     throw new Error('INSERT_TO_DB_FAILED');
-//             }
-//             return true;
-//         }
-//     } catch (error:any) {
-//         if(error.message === "NO_NFT_DATA")
-//             console.log("NFT not found in DB");
-//         else if(error.message === "INSERT_TO_DB_FAILED")
-//             console.log("Could not insert data to database");
-//         return false;
-//     }
-
-// }
+            const allOwners: object[] = nftOwners;
+            // const allOwners:object[] = [];
+            for (var i = 0; i < allOwners.length; i++) {
+                const eachOwner: any = allOwners[i];
+                //fetch NFT metadata here
+                const insertToDb = await supabase.from('monitor_mints').upsert({
+                    mint_address: eachOwner.nft_address,
+                    current_holder: eachOwner.owner,
+                });
+                if (insertToDb.error !== null) throw new Error('INSERT_TO_DB_FAILED');
+            }
+            return true;
+        }
+    } catch (error: any) {
+        if (error.message === 'NO_NFT_DATA') console.log('NFT not found in DB');
+        else if (error.message === 'INSERT_TO_DB_FAILED') console.log('Could not insert data to database');
+        return false;
+    }
+}

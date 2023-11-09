@@ -44,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                     creator_wallet: process.env.NEXT_PUBLIC_KEY,
                     metadata_uri: metadata_uri,
                     merkle_tree: merkle_tree,
-                    // collection_address: collection_address,
+                    collection_address: 'A4fbexgysFG9YrqDKq4oREWFNtCJDEEVgd2FZXMfeeHk',
                     max_supply: max_supply,
                     receiver: holder,
                 };

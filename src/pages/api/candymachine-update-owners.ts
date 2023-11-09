@@ -1,7 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { ShyftSdk, Network, CandyMachineProgram } from '@shyft-to/js';
+import { createClient } from '@supabase/supabase-js';
 
 const shyftClient = new ShyftSdk({ apiKey: process.env.NEXT_SHYFT_API_KEY ?? '', network: Network.Mainnet });
+
+const supabaseUrl = process.env.NEXT_SUPABASE_DB_URL ?? '';
+const supabaseKey = process.env.NEXT_SUPABASE_DB_KEY ?? '';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 type ShyftArrayResultResponse = {
     success: boolean;
@@ -13,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     try {
         var cm_address: string = '';
         var network: string = '';
-        var version: string = "";
+        var version: string = '';
 
         cm_address = typeof req.body.cm_address === 'string' ? req.body.cm_address : '';
         network = typeof req.body.network === 'string' ? req.body.network : 'mainnet-beta';
@@ -28,8 +33,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         var cm_mints: any[] = [];
         var getMintsFromCandyMachine: string[];
 
-        const cm_version = (version === "v3")?CandyMachineProgram.V3:CandyMachineProgram.V2;
-    
+        const cm_version = version === 'v3' ? CandyMachineProgram.V3 : CandyMachineProgram.V2;
+
         try {
             getMintsFromCandyMachine = await shyftClient.candyMachine.readMints({
                 network: shyftNetwork,
@@ -65,33 +70,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     }
 }
 
-// async function pushNftDataToDatabase(reference_address: string, addresses_to_monitor: string[], network: Network):Promise<boolean> {
+// async function pushNftDataToDatabase(
+//     reference_address: string,
+//     addresses_to_monitor: string[],
+//     network: Network
+// ): Promise<boolean> {
 //     try {
-//         if(addresses_to_monitor.length > 0)
-//         {
-//                 // var objectToBePushed = {};
+//         if (addresses_to_monitor.length > 0) {
+//             var objectToBePushed = {};
 
-//                 // const mintExists = await supabase
-//                 //     .from('monitor_mints')
-//                 //     .select()
-//                 //     .eq("mint_address",nft.mint);
+//             const mintExists = await supabase.from('monitor_mints').select().eq('mint_address', nft.mint);
 
-//                 // if(mintExists.count !== null)
-//                 //     objectToBePushed = mintExists.data[0];
+//             if (mintExists.count !== null) objectToBePushed = mintExists.data[0];
 
-//                 // objectToBePushed ={ ...objectToBePushed, mint_address: nft.mint, current_holder: nft.owner};
+//             objectToBePushed = { ...objectToBePushed, mint_address: nft.mint, current_holder: nft.owner };
 
-//                 //  //get from DB then push
-//                 // const insertToDb = await supabase.from('monitor_mints').upsert(objectToBePushed);
-//                 // if (insertToDb.error !== null)
-//                 //     throw new Error('INSERT_TO_DB_FAILED');
-//         }
-//         else
-//         {
+//             //get from DB then push
+//             const insertToDb = await supabase.from('monitor_mints').upsert(objectToBePushed);
+//             if (insertToDb.error !== null) throw new Error('INSERT_TO_DB_FAILED');
+//         } else {
 //             return false;
 //         }
 //         return true;
-//     } catch (error:any) {
+//     } catch (error: any) {
 //         console.log(error);
 //         return false;
 //     }
